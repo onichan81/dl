@@ -7,44 +7,53 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
 
-# Step 1: Generate synthetic dataset
-X, y = make_classification(n_samples=1000, n_features=20, n_informative=15, 
-                           n_redundant=5, random_state=42)
+# Generate synthetic dataset
+X, y = make_classification(n_samples=1000, n_features=20, n_informative=15, random_state=42)
 
-# Step 2: Split data into training and testing sets
+# Split dataset
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Step 3: Normalize the features
+# Standardizing the data
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
-# Step 4: Build the feedforward neural network model
+# Define the model
 model = Sequential([
-    Dense(32, activation='relu', input_shape=(X_train.shape[1],)),  # Input layer
-    Dense(16, activation='relu'),  # Hidden layer
-    Dense(1, activation='sigmoid')  # Output layer for binary classification
+    Dense(32, activation='relu', input_shape=(20,)),
+    Dense(16, activation='relu'),
+    Dense(1, activation='sigmoid')
 ])
 
-# Step 5: Compile the model
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+# Display model summary
+model.summary()
 
-# Step 6: Train the model
-history = model.fit(X_train, y_train, epochs=10, batch_size=32, validation_split=0.2, verbose=1)
+# Compile the model
+model.compile(
+    optimizer='adam',
+    loss='binary_crossentropy',
+    metrics=['accuracy']
+)
 
-# Step 7: Evaluate the model
-test_loss, test_accuracy = model.evaluate(X_test, y_test, verbose=0)
-print(f"Test Accuracy: {test_accuracy * 100:.2f}%")
+# Train the model
+history = model.fit(X_train, y_train, epochs=10, batch_size=32, validation_split=0.2)
 
-# Step 8: Make predictions
-predictions = (model.predict(X_test) > 0.5).astype("int32")
-accuracy = accuracy_score(y_test, predictions)
-print(f"Accuracy Score: {accuracy * 100:.2f}%")
+# Evaluate the model on the test set
+test_loss, test_accuracy = model.evaluate(X_test, y_test)
+print(f"Test Accuracy: {test_accuracy * 100:.2f}")
 
-# Step 9: Plot training history
-plt.figure(figsize=(10, 5))
-plt.plot(history.history['accuracy'], label='Training Accuracy')
-plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+# Make predictions and calculate accuracy
+predictions = model.predict(X_test)
+accuracy = accuracy_score(y_test, (predictions > 0.5))  # Threshold prediction values
+print(f"Accuracy: {accuracy * 100:.2f}")
+
+# Save the model
+model.save("Feedforward_model.h5")
+
+# Plot training & validation accuracy
+plt.figure(figsize=(10, 7))
+plt.plot(history.history['accuracy'], label="Training Accuracy")
+plt.plot(history.history['val_accuracy'], label="Validation Accuracy")
 plt.title('Model Accuracy')
 plt.xlabel('Epochs')
 plt.ylabel('Accuracy')
